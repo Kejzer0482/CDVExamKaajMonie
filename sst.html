@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sea Surface Temperature Wave</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background: #fefefe;
+      font-family: sans-serif;
+    }
+    svg {
+      display: block;
+      margin: 0 auto;
+      background: white;
+    }
+    #tooltip {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+  </style>
+</head>
+<body>
+  <svg id="waveChart" width="1000" height="400"></svg>
+  <div id="tooltip"></div>
+
+  <script>
+    const svg = d3.select("#waveChart");
+    const width = +svg.attr("width");
+    const height = +svg.attr("height");
+    const margin = { top: 40, right: 40, bottom: 40, left: 40 };
+
+    const tooltip = d3.select("#tooltip");
+
+    d3.csv("sst_domino.csv").then(data => {
+      data.forEach(d => {
+        d.year = +d.year;
+        d.sst = +d.sst;
+      });
+
+      const xScale = d3.scaleLinear()
+        .domain(d3.extent(data, d => d.year))
+        .range([margin.left, width - margin.right]);
+
+      const yScale = d3.scaleLinear()
+        .domain([d3.min(data, d => d.sst) - 0.5, d3.max(data, d => d.sst) + 0.5])
+        .range([height - margin.bottom, margin.top]);
+
+      const colorScale = d3.scaleSequential()
+        .interpolator(d3.interpolateRdBu) // correct direction below
+        .domain([d3.max(data, d => d.sst), d3.min(data, d => d.sst)]);
+
+      // Line generator (wave)
+      const line = d3.line()
+        .x(d => xScale(d.year))
+        .y(d => yScale(d.sst))
+        .curve(d3.curveCatmullRom.alpha(0.5));
+
+      // Background path (thicker wave)
+      svg.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "#ddd")
+        .attr("stroke-width", 5)
+        .attr("d", line);
+
+      // Colored wave overlay
+      svg.selectAll("circle")
+        .data(data)
+        .join("circle")
+        .attr("cx", d => xScale(d.year))
+        .attr("cy", d => yScale(d.sst))
+        .attr("r", 4)
+        .attr("fill", d => colorScale(d.sst))
+        .attr("stroke", "white")
+        .attr("stroke-width", 0.5)
+        .on("mouseover", (event, d) => {
+          tooltip
+            .style("opacity", 1)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 20) + "px")
+            .html(`<b>${d.year}</b><br>${d.sst.toFixed(2)}Â°C`);
+        })
+        .on("mouseout", () => tooltip.style("opacity", 0));
+
+      // Axis at bottom
+      const xAxis = d3.axisBottom(xScale)
+        .ticks(10)
+        .tickFormat(d3.format("d"));
+
+      svg.append("g")
+        .attr("transform", `translate(0, ${height - margin.bottom})`)
+        .call(xAxis);
+    });
+  </script>
+</body>
+</html>
