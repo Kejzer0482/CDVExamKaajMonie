@@ -9,23 +9,35 @@ d3.csv("sst_decades.csv").then(data => {
       .attr("width", 1100)
       .attr("height", 650);
   
-    // Layout settings
+    // 🔳 Baggrundsfarve som rect (sort-blå nuance)
+    svg.append("rect")
+      .attr("width", 1100)
+      .attr("height", 650)
+      .attr("fill", "#1a1a1a");
+  
+    // ✨ Halo-glød
+    svg.append("defs").append("filter")
+      .attr("id", "glow")
+      .append("feGaussianBlur")
+      .attr("stdDeviation", 4);
+  
+    // Layout
     const gridCols = 6;
     const xSpacing = 160;
     const ySpacing = 160;
     const marginTop = 80;
     const marginLeft = 80;
   
-    // Scales
+    // Skalaer
     const radiusScale = d3.scaleLinear()
       .domain(d3.extent(data, d => d.mean_sst))
       .range([20, 50]);
   
     const stdColor = d3.scaleLinear()
       .domain(d3.extent(data, d => d.std_sst))
-      .range(["#f9dcc4", "#c9184a"]); // varm pastel til kraftig rød
+      .range(["#ffd6a5", "#ff595e"]); // pastel orange → rød
   
-    // Group containers
+    // Grupper
     const groups = svg.selectAll("g")
       .data(data)
       .enter()
@@ -36,37 +48,62 @@ d3.csv("sst_decades.csv").then(data => {
         return `translate(${x}, ${y})`;
       });
   
-    // Mean SST Circle
+    // 🔆 Halo-effekt
     groups.append("circle")
-      .attr("r", d => radiusScale(d.mean_sst))
-      .attr("fill", "#a4c3b2")
-      .attr("opacity", 0.8);
+      .attr("r", d => radiusScale(d.mean_sst) + 10)
+      .attr("fill", "none")
+      .attr("stroke", "#fff5b7")
+      .attr("stroke-width", 6)
+      .attr("opacity", 0.3)
+      .style("filter", "url(#glow)");
   
-    // STD deviation ring
+    // 🔴 STD afvigelsesring
     groups.append("circle")
       .attr("r", d => radiusScale(d.mean_sst) + d.std_sst * 10)
       .attr("stroke", d => stdColor(d.std_sst))
       .attr("stroke-width", 2)
-      .attr("fill", "none");
+      .attr("fill", "none")
+      .attr("opacity", 0.6);
   
-    // Organic blob
-    groups.append("path")
-      .attr("d", "M10,0 Q15,30 0,20 Q-15,10 -10,0 Z")
-      .attr("fill", "#ffcad4")
-      .attr("transform", () => {
-        const scale = 1 + Math.random() * 0.5;
-        const rotate = Math.random() * 360;
-        return `scale(${scale}) rotate(${rotate})`;
-      })
-      .attr("opacity", 0.35);
+    // 🌍 Jordklode – roterer om sig selv
+    groups.each(function(d) {
+      const group = d3.select(this);
+      const r = radiusScale(d.mean_sst);
+      const img = group.append("image")
+        .attr("xlink:href", "earth.png")
+        .attr("width", r * 2)
+        .attr("height", r * 2)
+        .attr("x", -r)
+        .attr("y", -r);
   
-    // Decade label
+      animateRotation(img, 0, 0);
+    });
+  
+    function animateRotation(selection, cx, cy) {
+      let angle = 0;
+      function rotate() {
+        selection.transition()
+          .duration(6000)
+          .ease(d3.easeLinear)
+          .attrTween("transform", () => {
+            const interpolate = d3.interpolate(angle, angle + 360);
+            return t => `rotate(${interpolate(t)}, ${cx}, ${cy})`;
+          })
+          .on("end", () => {
+            angle += 360;
+            rotate();
+          });
+      }
+      rotate();
+    }
+  
+    // 📅 Årtals-labels
     groups.append("text")
       .attr("y", radiusScale.range()[1] + 20)
       .attr("text-anchor", "middle")
       .style("font-size", "14px")
       .style("font-family", "Georgia, serif")
-      .style("fill", "#333")
+      .style("fill", "#fefae0")
       .text(d => d.decade + "s");
   });
   

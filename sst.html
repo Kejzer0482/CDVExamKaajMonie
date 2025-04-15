@@ -1,209 +1,120 @@
 <!DOCTYPE html>
-<html lang="da">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Et Varmt Minde – Nordatlanten SST</title>
+  <title>A Warmer Memory – Sea Surface Temperatures</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
-  margin: 0;
-  font-family: 'Georgia', serif;
-  background: #f7f2e8; /* varm, naturlig tone */
-  color: #2b2b2b;
-  line-height: 1.6;
-}
-
-
-    section {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 3em;
-      font-size: 1.5em;
-      text-align: center;
-      transition: opacity 1s ease-in-out;
+      margin: 0;
+      font-family: Georgia, serif;
+      background: #121212;
+      color: #eee;
     }
 
-    .hidden {
-      opacity: 0;
-    }
-
-    .visible {
-      opacity: 1;
-    }
-
-    svg {
+    #sstViz {
       display: block;
-      margin: 0 auto;
-      background: #fff;
+      margin: 2em auto;
+      background: #1f1f1f;
     }
 
-    #tooltip {
-      position: absolute;
-      background: rgba(255,255,255,0.9);
-      padding: 8px 10px;
-      border: 1px solid #ccc;
-      font-size: 0.8em;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s;
+    #legend {
+      background: #1a1a1a;
+      color: #eee;
+      padding: 2em;
+      font-family: Georgia, serif;
+    }
+
+    #legend h2 {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+      color: #fff;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5em;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+    }
+
+    .legend-item svg {
+      flex-shrink: 0;
+    }
+
+    #intro {
+      padding: 2em;
+      background: #1a1a1a;
+      color: #eee;
+      font-family: Georgia, serif;
+      line-height: 1.6;
+    }
+
+    #intro h1 {
+      font-size: 2em;
+      margin-bottom: 1em;
+      color: #fff;
+    }
+
+    #intro p {
+      margin-bottom: 1em;
     }
   </style>
 </head>
-
 <body>
 
-  <section id="intro" class="step visible">
-    <h1>Et Varmt Minde</h1>
-    <p>En sanselig rejse gennem havets temperaturer ved Nordatlanten, fra 1854 til i dag.</p>
+  <section id="intro">
+    <h1>🌍 A Warmer Memory</h1>
+    <p><strong>A creative data visualisation exploring changing sea surface temperatures in the North Atlantic from 1850 to today.</strong></p>
+    <p>This visualisation reimagines climate data as a memory archive — one globe for each decade, representing over 170 years of warming oceans in the North Atlantic. Instead of lines and axes, we use planetary forms, glows, and rings to express shifting temperatures, growing variability, and the deepening impact of climate change.</p>
+    <p>The entire visual language is inspired by the Earth itself: <strong>the central globe</strong> represents our planet, <strong>the red ring</strong> evokes atmospheric instability, and <strong>the glow ring</strong> symbolises the broader climate impact — an abstract aura of consequence. Together, they form a planetary system that reminds us: this data is not just about numbers — it’s about the world we all live on.</p>
   </section>
+  
 
-  <section id="context" class="step hidden">
-    <p>
-      Nordatlanten er et af verdens mest foranderlige havområder. Hvert år svinger temperaturen i havoverfladen – men hvordan har den ændret sig over tid?
-    </p>
-  </section>
+<svg id="sstViz" width="1100" height="650"></svg>
 
-  <section id="viz" class="step hidden">
-    <svg id="sstViz" width="1000" height="500"></svg>
-  </section>
+<section id="legend">
+  <h2>How to read the visualisation</h2>
+  <div class="legend-grid">
+    
+    <div class="legend-item">
+      <svg width="40" height="40">
+        <image href="earth.png" x="0" y="0" width="40" height="40" />
+      </svg>
+      <p><strong>Earth icon:</strong> Represents average sea surface temperature (SST) for each decade. Bigger = warmer.</p>
+    </div>
 
-  <section id="reflection" class="step hidden">
-    <p>
-      Hvad betyder det for vores minder? For os, der sejler, fisker og lever langs kysten?
-    </p>
-  </section>
+    <div class="legend-item">
+      <svg width="40" height="40">
+        <circle cx="20" cy="20" r="18" fill="none" stroke="#ffb703" stroke-width="8" opacity="0.3" />
+      </svg>
+      <p><strong>Glow ring:</strong> Symbolises abstract climate impact for the decade. Larger and brighter = more impactful.</p>
+    </div>
 
-  <div id="tooltip"></div>
+    <div class="legend-item">
+      <svg width="40" height="40">
+        <circle cx="20" cy="20" r="18" fill="none" stroke="#c9184a" stroke-width="2" opacity="0.6" />
+      </svg>
+      <p><strong>Red ring:</strong> Indicates temperature variation (standard deviation). Bigger = more unstable.</p>
+    </div>
 
-  <script>
-    // Scroll interaktion
-    document.addEventListener('scroll', function () {
-      const sections = document.querySelectorAll('section');
-      const scrollPosition = window.scrollY + window.innerHeight / 2;
+  </div>
 
-      sections.forEach(section => {
-        if (section.offsetTop <= scrollPosition && section.offsetTop + section.offsetHeight > scrollPosition) {
-          section.classList.add('visible');
-          section.classList.remove('hidden');
-        } else {
-          section.classList.remove('visible');
-          section.classList.add('hidden');
-        }
-      });
-    });
+  <p>🌀 This work was developed as part of the final exam project for the <em>Creative Data Visualisation</em> course taught by <strong>Annelie Berner</strong> at the <strong>IT University of Copenhagen</strong>.</p>
+  <p>
+    🌀 The sea surface temperature data comes from the 
+    <a href="https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/v2.1/access/avhrr/198109/" target="_blank">
+      NOAA Optimum Interpolation SST V2.1 dataset (AVHRR)
+    </a>, accessed via the National Centers for Environmental Information.
+  </p>
+</section>
 
-    // Visualisering
-    d3.csv("sst_decades.csv").then(data => {
-      data.forEach(d => {
-        d.year = +d.year;
-        d.sst = +d.sst;
-      });
+<script src="grid-viz.js"></script>
 
-      const svg = d3.select("#sstViz"),
-            width = +svg.attr("width"),
-            height = +svg.attr("height"),
-            margin = { top: 20, right: 30, bottom: 30, left: 40 };
-
-      const x = d3.scaleLinear()
-          .domain(d3.extent(data, d => d.year))
-          .range([margin.left, width - margin.right]);
-
-      const y = d3.scaleLinear()
-          .domain([d3.min(data, d => d.sst) - 0.5, d3.max(data, d => d.sst) + 0.5])
-          .range([height - margin.bottom, margin.top]);
-
-      const line = d3.line()
-          .x(d => x(d.year))
-          .y(d => y(d.sst));
-
-      svg.append("g")
-          .attr("transform", `translate(0,${height - margin.bottom})`)
-          .call(d3.axisBottom(x).ticks(width / 80).tickFormat(d3.format("d")));
-
-      svg.append("g")
-          .attr("transform", `translate(${margin.left},0)`)
-          .call(d3.axisLeft(y));
-
-      svg.append("path")
-          .datum(data)
-          .attr("fill", "none")
-          .attr("stroke", "#69b3a2")
-          .attr("stroke-width", 1.5)
-          .attr("d", line)
-          .attr("stroke-dasharray", function () {
-            const length = this.getTotalLength();
-            return `${length} ${length}`;
-          })
-          .attr("stroke-dashoffset", function () {
-            return this.getTotalLength();
-          })
-          .transition()
-          .duration(2000)
-          .ease(d3.easeLinear)
-          .attr("stroke-dashoffset", 0);
-
-      // Scroll-reaktioner
-      const steps = document.querySelectorAll("section");
-      window.addEventListener("scroll", () => {
-        const scrollPosition = window.scrollY + window.innerHeight / 2;
-        steps.forEach(section => {
-          if (
-            section.offsetTop <= scrollPosition &&
-            section.offsetTop + section.offsetHeight > scrollPosition
-          ) {
-            const stepId = section.getAttribute("id");
-
-            if (stepId === "context") {
-              const warmYears = data.filter(d => d.sst > 20);
-              svg.selectAll(".dot")
-                .data(warmYears)
-                .enter()
-                .append("circle")
-                .attr("class", "dot")
-                .attr("cx", d => x(d.year))
-                .attr("cy", d => y(d.sst))
-                .attr("r", 0)
-                .attr("fill", "red")
-                .transition()
-                .duration(1000)
-                .attr("r", 5);
-            }
-
-            if (stepId === "viz") {
-              const futureData = [
-                { year: 2025, sst: data.find(d => d.year === 2025).sst },
-                { year: 2035, sst: data.find(d => d.year === 2035).sst }
-              ];
-              const trendLine = d3.line()
-                  .x(d => x(d.year))
-                  .y(d => y(d.sst));
-
-              svg.append("path")
-                  .datum(futureData)
-                  .attr("fill", "none")
-                  .attr("stroke", "orange")
-                  .attr("stroke-width", 2)
-                  .style("stroke-dasharray", "4 2")
-                  .attr("d", trendLine);
-            }
-
-            if (stepId === "reflection") {
-              svg.append("text")
-                  .attr("x", width / 2)
-                  .attr("y", height / 2)
-                  .attr("text-anchor", "middle")
-                  .style("font-size", "1.2em")
-                  .style("fill", "#444")
-                  .text("Et varmt minde fra Nordatlanten...");
-            }
-          }
-        });
-      });
-    });
-  </script>
-  <script src="grid-viz.js"></script>
 </body>
 </html>
