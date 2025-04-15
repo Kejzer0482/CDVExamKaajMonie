@@ -10,12 +10,12 @@ print(ds)
 #Prøv først uden filter — hvad er shape, min/max?
 print(ds['sst'])
 
-#Tjek værdier i en lille region, fx Atlanten
-sst_na = ds['sst'].sel(lat=slice(60, 0), lon=slice(280, 360))
-print("Subset:", sst_na)
+#Vadehavet
+sst_vadehavet = ds['sst'].sel(lat=slice(55.5, 54.5), lon=slice(8, 9))
+print("Subset (Vadehavet):", sst_vadehavet)
 
 #Drop NaNs og gem nogle prøvedata
-sst_df = sst_na.mean(dim=["lat", "lon"], skipna=True).to_dataframe().dropna()
+sst_df = sst_vadehavet.mean(dim=["lat", "lon"], skipna=True).to_dataframe().dropna()
 
 #Hent år og grupér
 sst_df["year"] = sst_df.index.year
@@ -29,5 +29,5 @@ sst_2035 = pd.DataFrame({
 sst_annual = pd.concat([sst_annual, sst_2035], ignore_index=True)
 
 #Gem fil
-sst_annual.to_csv("sst_domino.csv", index=False)
-print("✅ Gemte sst_domino.csv med:", len(sst_annual), "rækker")
+sst_annual.to_csv("sst_vadehavet.csv", index=False)
+print("✅ Gemte sst_vadehavet.csv med:", len(sst_annual), "rækker")
