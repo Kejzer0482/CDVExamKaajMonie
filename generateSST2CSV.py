@@ -28,6 +28,19 @@ sst_2035 = pd.DataFrame({
 })
 sst_annual = pd.concat([sst_annual, sst_2035], ignore_index=True)
 
-# Gem fil
+# Gem årlige data
 sst_annual.to_csv("sst_nordatlanten.csv", index=False)
 print("✅ Gemte sst_nordatlanten.csv med:", len(sst_annual), "rækker")
+
+# Beregn statistik for hvert årti
+sst_df["decade"] = (sst_df["year"] // 10) * 10
+sst_decades = sst_df.groupby("decade").agg({
+    "sst": ["mean", "std", "min", "max"]
+}).reset_index()
+
+# Flatten kolonnenavne
+sst_decades.columns = ["decade", "mean_sst", "std_sst", "min_sst", "max_sst"]
+
+# Gem årti-data
+sst_decades.to_csv("sst_decades.csv", index=False)
+print("✅ Gemte sst_decades.csv med:", len(sst_decades), "årtier")

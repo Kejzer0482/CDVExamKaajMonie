@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <title>Et Varmt Minde – Nordatlanten SST</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Georgia', serif;
+      background: #f7f2e8; /* varm, naturlig tone */
+      color: #2b2b2b;
+      line-height: 1.6;
+    }
+
+    section {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3em;
+      font-size: 1.5em;
+      text-align: center;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .hidden {
+      opacity: 0;
+    }
+
+    .visible {
+      opacity: 1;
+    }
+
+    svg {
+      display: block;
+      margin: 0 auto;
+      background: #fff;
+    }
+
+    #tooltip {
+      position: absolute;
+      background: rgba(255,255,255,0.9);
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      font-size: 0.8em;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+  </style>
+</head>
+
+<body>
+
+  <section id="intro" class="step visible">
+    <h1>Et Varmt Minde</h1>
+    <p>En sanselig rejse gennem havets temperaturer ved Nordatlanten, fra 1854 til i dag.</p>
+  </section>
+
+  <section id="context" class="step hidden">
+    <p>
+      Nordatlanten er et af verdens mest foranderlige havområder. Hvert år svinger temperaturen i havoverfladen – men hvordan har den ændret sig over tid?
+    </p>
+  </section>
+
+  <section id="viz" class="step hidden">
+    <svg id="sstViz" width="1000" height="500"></svg>
+  </section>
+
+  <section id="reflection" class="step hidden">
+    <p>
+      Hvad betyder det for vores minder? For os, der sejler, fisker og lever langs kysten?
+    </p>
+  </section>
+
+  <div id="tooltip"></div>
+
+  <script src="grid-viz.js"></script>
+</body>
+</html>

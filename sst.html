@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-  <meta charset="UTF-8">
-  <title>Et Varmt Minde – Vadehavet SST</title>
+  <meta charset="UTF-8" />
+  <title>Et Varmt Minde – Nordatlanten SST</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
-      margin: 0;
-      font-family: "Helvetica Neue", sans-serif;
-      background: #fdfaf6;
-    }
+  margin: 0;
+  font-family: 'Georgia', serif;
+  background: #f7f2e8; /* varm, naturlig tone */
+  color: #2b2b2b;
+  line-height: 1.6;
+}
+
 
     section {
       height: 100vh;
@@ -49,16 +52,17 @@
     }
   </style>
 </head>
+
 <body>
 
   <section id="intro" class="step visible">
     <h1>Et Varmt Minde</h1>
-    <p>En sanselig rejse gennem havets temperaturer ved Vadehavet, fra 1854 til i dag.</p>
+    <p>En sanselig rejse gennem havets temperaturer ved Nordatlanten, fra 1854 til i dag.</p>
   </section>
 
   <section id="context" class="step hidden">
     <p>
-      Vadehavet er et af Danmarks mest foranderlige landskaber. Hvert år svinger temperaturen i havoverfladen – men hvordan har den ændret sig over tid?
+      Nordatlanten er et af verdens mest foranderlige havområder. Hvert år svinger temperaturen i havoverfladen – men hvordan har den ændret sig over tid?
     </p>
   </section>
 
@@ -68,7 +72,7 @@
 
   <section id="reflection" class="step hidden">
     <p>
-      Hvad betyder det for vores minder? For os, der bader, går ture og lever langs kysten?
+      Hvad betyder det for vores minder? For os, der sejler, fisker og lever langs kysten?
     </p>
   </section>
 
@@ -90,6 +94,116 @@
         }
       });
     });
+
+    // Visualisering
+    d3.csv("sst_decades.csv").then(data => {
+      data.forEach(d => {
+        d.year = +d.year;
+        d.sst = +d.sst;
+      });
+
+      const svg = d3.select("#sstViz"),
+            width = +svg.attr("width"),
+            height = +svg.attr("height"),
+            margin = { top: 20, right: 30, bottom: 30, left: 40 };
+
+      const x = d3.scaleLinear()
+          .domain(d3.extent(data, d => d.year))
+          .range([margin.left, width - margin.right]);
+
+      const y = d3.scaleLinear()
+          .domain([d3.min(data, d => d.sst) - 0.5, d3.max(data, d => d.sst) + 0.5])
+          .range([height - margin.bottom, margin.top]);
+
+      const line = d3.line()
+          .x(d => x(d.year))
+          .y(d => y(d.sst));
+
+      svg.append("g")
+          .attr("transform", `translate(0,${height - margin.bottom})`)
+          .call(d3.axisBottom(x).ticks(width / 80).tickFormat(d3.format("d")));
+
+      svg.append("g")
+          .attr("transform", `translate(${margin.left},0)`)
+          .call(d3.axisLeft(y));
+
+      svg.append("path")
+          .datum(data)
+          .attr("fill", "none")
+          .attr("stroke", "#69b3a2")
+          .attr("stroke-width", 1.5)
+          .attr("d", line)
+          .attr("stroke-dasharray", function () {
+            const length = this.getTotalLength();
+            return `${length} ${length}`;
+          })
+          .attr("stroke-dashoffset", function () {
+            return this.getTotalLength();
+          })
+          .transition()
+          .duration(2000)
+          .ease(d3.easeLinear)
+          .attr("stroke-dashoffset", 0);
+
+      // Scroll-reaktioner
+      const steps = document.querySelectorAll("section");
+      window.addEventListener("scroll", () => {
+        const scrollPosition = window.scrollY + window.innerHeight / 2;
+        steps.forEach(section => {
+          if (
+            section.offsetTop <= scrollPosition &&
+            section.offsetTop + section.offsetHeight > scrollPosition
+          ) {
+            const stepId = section.getAttribute("id");
+
+            if (stepId === "context") {
+              const warmYears = data.filter(d => d.sst > 20);
+              svg.selectAll(".dot")
+                .data(warmYears)
+                .enter()
+                .append("circle")
+                .attr("class", "dot")
+                .attr("cx", d => x(d.year))
+                .attr("cy", d => y(d.sst))
+                .attr("r", 0)
+                .attr("fill", "red")
+                .transition()
+                .duration(1000)
+                .attr("r", 5);
+            }
+
+            if (stepId === "viz") {
+              const futureData = [
+                { year: 2025, sst: data.find(d => d.year === 2025).sst },
+                { year: 2035, sst: data.find(d => d.year === 2035).sst }
+              ];
+              const trendLine = d3.line()
+                  .x(d => x(d.year))
+                  .y(d => y(d.sst));
+
+              svg.append("path")
+                  .datum(futureData)
+                  .attr("fill", "none")
+                  .attr("stroke", "orange")
+                  .attr("stroke-width", 2)
+                  .style("stroke-dasharray", "4 2")
+                  .attr("d", trendLine);
+            }
+
+            if (stepId === "reflection") {
+              svg.append("text")
+                  .attr("x", width / 2)
+                  .attr("y", height / 2)
+                  .attr("text-anchor", "middle")
+                  .style("font-size", "1.2em")
+                  .style("fill", "#444")
+                  .text("Et varmt minde fra Nordatlanten...");
+            }
+          }
+        });
+      });
+    });
   </script>
+  <script src="grid-viz.js"></script>
 </body>
 </html>
