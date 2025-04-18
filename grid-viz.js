@@ -36,6 +36,15 @@ d3.csv("sst_decades.csv").then(data => {
     const stdColor = d3.scaleLinear()
       .domain(d3.extent(data, d => d.std_sst))
       .range(["#ffd6a5", "#ff595e"]); // pastel orange → rød
+
+    const glowWidthScale = d3.scaleLinear()
+      .domain(d3.extent(data, d => d.mean_sst))
+      .range([3, 10]); // Adjust for how wide the halo should get
+
+    const glowOpacityScale = d3.scaleLinear()
+      .domain(d3.extent(data, d => d.mean_sst))
+      .range([0, 0.6]); // More intense glow
+
   
     // Grupper
     const groups = svg.selectAll("g")
@@ -53,8 +62,8 @@ d3.csv("sst_decades.csv").then(data => {
       .attr("r", d => radiusScale(d.mean_sst) + 10)
       .attr("fill", "none")
       .attr("stroke", "#fff5b7")
-      .attr("stroke-width", 6)
-      .attr("opacity", 0.3)
+      .attr("stroke-width", d => glowWidthScale(d.mean_sst))
+      .attr("opacity", d => glowOpacityScale(d.mean_sst))
       .style("filter", "url(#glow)");
   
     // 🔴 STD afvigelsesring
